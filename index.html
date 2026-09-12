@@ -9,8 +9,7 @@
     <style type="text/tailwindcss">
         @variant dark (&:where(.dark, .dark *));
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@latest/dist/html2canvas-pro.min.js"></script>  
-    <link rel="icon" type="image/png" href="/src/assets/logo.png" /> 
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@latest/dist/html2canvas-pro.min.js"></script>   
     <title>Project Tanggalan Jawa</title>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 min-h-screen transition-colors duration-300">
@@ -20,7 +19,7 @@
         <div class="flex justify-between items-center mb-6">
             <div class="flex items-center gap-2">
                 <img src="/src/assets/logo.png" alt="Logo AFFI" class="w-9 h-9 rounded-lg object-contain">
-                <span class="font-semibold text-slate-700 dark:text-slate-300">Vyy</span>
+                <span class="font-semibold text-slate-700 dark:text-slate-300">By Vyy</span>
             </div>
             
             <div class="toggleWrapper">
@@ -70,36 +69,34 @@
     
                 <div id="form-input-section" class="max-w-md mx-auto space-y-4">
                     <div>
-                        <label for="mode-input" class="block mb-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Pilih Metode Input</label>
-                        <select id="mode-input" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-400">
-                            <option value="">-- Pilih --</option>
-                            <option value="hari-pasaran">Saya tau Hari & Pasaran</option>
-                            <option value="tanggal-lahir">Saya tau Tanggal Lahir</option>
-                        </select>
+                        <label class="block mb-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Pilih Metode Input</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" data-mode="hari-pasaran" class="mode-btn px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                Hari & Pasaran
+                            </button>
+                            <button type="button" data-mode="tanggal-lahir" class="mode-btn px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                Tgl Lahir
+                            </button>
+                        </div>
                     </div>
     
-                    <div id="section-hari-pasaran" class="hidden space-y-4">
-                        <div>
-                            <label class="block mb-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Pilih Hari</label>
-                            <select id="input-hari" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-400">
-                                <option value="senin">Senin</option>
-                                <option value="selasa">Selasa</option>
-                                <option value="rabu">Rabu</option>
-                                <option value="kamis">Kamis</option>
-                                <option value="jumat">Jumat</option>
-                                <option value="sabtu">Sabtu</option>
-                                <option value="minggu">Minggu</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block mb-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Pilih Pasaran</label>
-                            <select id="input-pasaran" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-400">
-                                <option value="legi">Legi</option>
-                                <option value="pahing">Pahing</option>
-                                <option value="pon">Pon</option>
-                                <option value="wage">Wage</option>
-                                <option value="kliwon">Kliwon</option>
-                            </select>
+                    <div id="section-hari-pasaran" class="hidden">
+                        <label class="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">Pilih Hari & Pasaran</label>
+                        <div class="flex justify-center gap-3">
+                            <div>
+                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Hari</div>
+                                <div class="wheel-picker" id="picker-hari">
+                                    <div class="wheel-picker__highlight"></div>
+                                    <div class="wheel-picker__list" id="wheel-list-hari"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Pasaran</div>
+                                <div class="wheel-picker" id="picker-pasaran">
+                                    <div class="wheel-picker__highlight"></div>
+                                    <div class="wheel-picker__list" id="wheel-list-pasaran"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
     

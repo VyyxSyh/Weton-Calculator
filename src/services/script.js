@@ -178,6 +178,80 @@ function renderLegend() {
     legendContainer.innerHTML = html;
 }
 
+// ==== Wheel Picker (scroll loop) untuk Hari & Pasaran ====
+const WHEEL_ITEM_HEIGHT = 44; // harus sama kayak height .wheel-picker__item di style.css
+
+const LABEL_HARI = {
+    senin: "Senin", selasa: "Selasa", rabu: "Rabu", kamis: "Kamis",
+    jumat: "Jumat", sabtu: "Sabtu", minggu: "Minggu"
+};
+
+const LABEL_PASARAN = {
+    legi: "Legi", pahing: "Pahing", pon: "Pon", wage: "Wage", kliwon: "Kliwon"
+};
+
+// Bikin & isi list picker, digandain 3x biar bisa di-loop terus-menerus
+function buildWheelPicker(listElId, items, labelMap, defaultValue) {
+    const listEl = document.getElementById(listElId);
+    const itemsLooped = [...items, ...items, ...items];
+
+    listEl.innerHTML = itemsLooped
+        .map(function(val) {
+            return `<div class="wheel-picker__item" data-value="${val}">${labelMap[val]}</div>`;
+        })
+        .join("");
+
+    const startIndex = items.length + items.indexOf(defaultValue);
+    listEl.parentElement.scrollTop = startIndex * WHEEL_ITEM_HEIGHT;
+
+    return { listEl, totalAsli: items.length, items: items };
+}
+
+// Baca posisi scroll sekarang, tentuin item yang lagi di tengah (aktif),
+// dan geser balik ke salinan tengah kalau udah mepet ujung (efek loop tak terbatas)
+function updateWheelActiveItem(pickerState) {
+    const listEl = pickerState.listEl;
+    const totalAsli = pickerState.totalAsli;
+    const items = pickerState.items;
+    const container = listEl.parentElement;
+
+    let index = Math.round(container.scrollTop / WHEEL_ITEM_HEIGHT);
+
+    if (index < totalAsli * 0.5) {
+        index += totalAsli;
+        container.scrollTop = index * WHEEL_ITEM_HEIGHT;
+    } else if (index >= totalAsli * 2.5) {
+        index -= totalAsli;
+        container.scrollTop = index * WHEEL_ITEM_HEIGHT;
+    }
+
+    const indexAsli = ((index % totalAsli) + totalAsli) % totalAsli;
+    container.dataset.value = items[indexAsli];
+
+    listEl.querySelectorAll(".wheel-picker__item").forEach(function(el, i) {
+        el.classList.toggle("active", i === index);
+    });
+}
+
+function initWheelPicker(containerId, listId, items, labelMap, defaultValue) {
+    const container = document.getElementById(containerId);
+    const pickerState = buildWheelPicker(listId, items, labelMap, defaultValue);
+    container.dataset.value = defaultValue;
+
+    updateWheelActiveItem(pickerState);
+
+    let scrollTimeout;
+    container.addEventListener("scroll", function() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(function() {
+            updateWheelActiveItem(pickerState);
+        }, 100);
+    });
+}
+
+initWheelPicker("picker-hari", "wheel-list-hari", Object.keys(NEPTU_HARI), LABEL_HARI, "senin");
+initWheelPicker("picker-pasaran", "wheel-list-pasaran", Object.keys(NEPTU_PASARAN), LABEL_PASARAN, "legi");
+
 updateKalender();
 
 // Update label bulan-tahun saat pertama kali load
@@ -217,31 +291,45 @@ document.getElementById("prev-month").addEventListener("click", function() {
     document.getElementById("bulan-tahun-label").textContent = `${getNamaBulan(currentMonth)} ${currentYear}`;
 });
 
-// Untuk menampilkan bulan dan tahun saat ini di label
-document.getElementById("mode-input").addEventListener("change", function() {
-    const modeTerpilih = this.value; 
-    
-    const sectionHariPasaran = document.getElementById("section-hari-pasaran");
-    const sectionTanggalLahir = document.getElementById("section-tanggal-lahir");
+// State mode input yang lagi aktif (gantiin .value dari select lama)
+let modeAktif = null;
 
-    
-    if (modeTerpilih === "hari-pasaran") {
-        sectionHariPasaran.classList.remove("hidden");
-        sectionTanggalLahir.classList.add("hidden");
-    } else if (modeTerpilih === "tanggal-lahir") {
-        sectionHariPasaran.classList.add("hidden");
-        sectionTanggalLahir.classList.remove("hidden");
-    }
+const MODE_BTN_ACTIVE = ["bg-sky-500", "hover:bg-sky-600", "text-white", "border-sky-500"];
+const MODE_BTN_INACTIVE = ["text-slate-600", "dark:text-slate-300", "hover:bg-slate-100", "dark:hover:bg-slate-800"];
+
+// Untuk menampilkan bulan dan tahun saat ini di label
+document.querySelectorAll(".mode-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+        modeAktif = this.dataset.mode;
+
+        document.querySelectorAll(".mode-btn").forEach(function(b) {
+            b.classList.remove(...MODE_BTN_ACTIVE);
+            b.classList.add(...MODE_BTN_INACTIVE);
+        });
+        this.classList.remove(...MODE_BTN_INACTIVE);
+        this.classList.add(...MODE_BTN_ACTIVE);
+
+        const sectionHariPasaran = document.getElementById("section-hari-pasaran");
+        const sectionTanggalLahir = document.getElementById("section-tanggal-lahir");
+
+        if (modeAktif === "hari-pasaran") {
+            sectionHariPasaran.classList.remove("hidden");
+            sectionTanggalLahir.classList.add("hidden");
+        } else if (modeAktif === "tanggal-lahir") {
+            sectionHariPasaran.classList.add("hidden");
+            sectionTanggalLahir.classList.remove("hidden");
+        }
+    });
 });
 
 // Event listener for the "Hitung" button
 document.getElementById("btn-hitung").addEventListener("click", async function() {
-    const mode = document.getElementById("mode-input").value;
+    const mode = modeAktif;
     let neptuUser = null;
     
     if (mode === "hari-pasaran") {
-        const hariUser =document.getElementById("input-hari").value;
-        const pasaranUser = document.getElementById("input-pasaran").value;
+        const hariUser = document.getElementById("picker-hari").dataset.value;
+        const pasaranUser = document.getElementById("picker-pasaran").dataset.value;
 
         neptuUser = hitungNeptuUser(hariUser, pasaranUser);
 

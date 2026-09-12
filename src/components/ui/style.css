@@ -62,3 +62,66 @@
 .input:checked + .toggle .star--4,
 .input:checked + .toggle .star--5,
 .input:checked + .toggle .star--6 { opacity: 1; }
+
+/* Wheel Picker (scroll loop) untuk Hari & Pasaran */
+.wheel-picker {
+    position: relative;
+    width: 110px;
+    height: 132px;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+}
+.wheel-picker::-webkit-scrollbar {
+    display: none;
+}
+.wheel-picker__list {
+    padding-top: 44px;
+    padding-bottom: 44px;
+}
+.wheel-picker__item {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #94a3b8;
+    transition: color 150ms, font-size 150ms;
+    user-select: none;
+}
+.wheel-picker__item.active {
+    color: #0ea5e9;
+    font-size: 1rem;
+    font-weight: 700;
+}
+.wheel-picker__highlight {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 44px;
+    transform: translateY(-50%);
+    border-top: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+    pointer-events: none;
+}
+.dark .wheel-picker {
+    background-color: #1e293b;
+    border-color: #475569;
+}
+.dark .wheel-picker__item {
+    color: #64748b;
+}
+.dark .wheel-picker__item.active {
+    color: #38bdf8;
+}
+.dark .wheel-picker__highlight {
+    border-color: #475569;
+}
