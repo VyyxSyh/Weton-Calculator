@@ -197,7 +197,8 @@ function buildWheelPicker(listElId, items, labelMap, defaultValue) {
 
     listEl.innerHTML = itemsLooped
         .map(function(val) {
-            return `<div class="wheel-picker__item" data-value="${val}">${labelMap[val]}</div>`;
+            const label = labelMap ? labelMap[val] : val;
+            return `<div class="wheel-picker__item" data-value="${val}">${label}</div>`;
         })
         .join("");
 
@@ -252,19 +253,22 @@ function commitWheelPosition(pickerState) {
     renderWheelFrame(pickerState);
 }
 
-function initWheelPicker(containerId, listId, items, labelMap, defaultValue) {
-    const container = document.getElementById(containerId);
-    const pickerState = buildWheelPicker(listId, items, labelMap, defaultValue);
-    container.dataset.value = defaultValue;
-
-    renderWheelFrame(pickerState);
-
-    // Klik salah satu item buat langsung snap ke situ dengan animasi smooth
+// Pasang klik-to-select di tiap item (dipisah biar bisa dipanggil ulang pas list-nya di-rebuild)
+function attachWheelItemClicks(pickerState, container) {
     pickerState.listEl.querySelectorAll(".wheel-picker__item").forEach(function(el, i) {
         el.addEventListener("click", function() {
             container.scrollTo({ top: i * WHEEL_ITEM_HEIGHT, behavior: "smooth" });
         });
     });
+}
+
+function initWheelPicker(containerId, listId, items, labelMap, defaultValue, onSettle) {
+    const container = document.getElementById(containerId);
+    const pickerState = buildWheelPicker(listId, items, labelMap, defaultValue);
+    container.dataset.value = defaultValue;
+
+    renderWheelFrame(pickerState);
+    attachWheelItemClicks(pickerState, container);
 
     let sedangAnimasi = false;
     let commitTimeout;
@@ -283,12 +287,74 @@ function initWheelPicker(containerId, listId, items, labelMap, defaultValue) {
         clearTimeout(commitTimeout);
         commitTimeout = setTimeout(function() {
             commitWheelPosition(pickerState);
+            if (typeof onSettle === "function") {
+                onSettle(container.dataset.value);
+            }
         }, 120);
     });
+
+    return pickerState;
+}
+
+// Ganti isi list picker yang udah ada (misal jumlah tanggal berubah pas bulan/tahun ganti),
+// tetep pakai container & listEl yang sama, cuma isinya di-refresh
+function rebuildWheelPicker(pickerState, containerId, items, labelMap, defaultValue) {
+    const container = document.getElementById(containerId);
+    const stateBaru = buildWheelPicker(pickerState.listEl.id, items, labelMap, defaultValue);
+
+    pickerState.items = stateBaru.items;
+    pickerState.totalAsli = stateBaru.totalAsli;
+    container.dataset.value = defaultValue;
+
+    renderWheelFrame(pickerState);
+    attachWheelItemClicks(pickerState, container);
 }
 
 initWheelPicker("picker-hari", "wheel-list-hari", Object.keys(NEPTU_HARI), LABEL_HARI, "senin");
 initWheelPicker("picker-pasaran", "wheel-list-pasaran", Object.keys(NEPTU_PASARAN), LABEL_PASARAN, "legi");
+
+// ==== Wheel Picker untuk Tanggal Lahir (Tanggal - Bulan - Tahun) ====
+const LABEL_BULAN = {
+    "1": "Januari", "2": "Februari", "3": "Maret", "4": "April",
+    "5": "Mei", "6": "Juni", "7": "Juli", "8": "Agustus",
+    "9": "September", "10": "Oktober", "11": "November", "12": "Desember"
+};
+
+const ITEMS_BULAN = Object.keys(LABEL_BULAN);
+const ITEMS_TAHUN = Array.from({ length: 2045 - 1970 + 1 }, function(_, i) { return String(1970 + i); });
+
+// Hitung jumlah hari dalam sebuah bulan (nangkep tahun kabisat juga otomatis)
+function getJumlahHariDalamBulan(bulan, tahun) {
+    return new Date(tahun, bulan, 0).getDate();
+}
+
+function buatItemsTanggal(jumlahHari) {
+    return Array.from({ length: jumlahHari }, function(_, i) { return String(i + 1); });
+}
+
+// Dipanggil tiap kali picker Bulan atau Tahun selesai di-scroll:
+// nyesuaiin ulang jumlah tanggal (28/29/30/31), dan kalau tanggal yang lagi
+// dipilih user "gak nakal" jadi ngelewatin batas bulan itu (misal 31 di bulan April), otomatis di-clamp
+function sesuaikanTanggalMaksimal() {
+    const bulanTerpilih = parseInt(document.getElementById("picker-bulan-lahir").dataset.value);
+    const tahunTerpilih = parseInt(document.getElementById("picker-tahun-lahir").dataset.value);
+    const jumlahHari = getJumlahHariDalamBulan(bulanTerpilih, tahunTerpilih);
+
+    const tanggalSaatIni = parseInt(document.getElementById("picker-tanggal-lahir").dataset.value);
+    const tanggalTervalidasi = Math.min(tanggalSaatIni, jumlahHari);
+
+    rebuildWheelPicker(
+        pickerTanggalLahirState,
+        "picker-tanggal-lahir",
+        buatItemsTanggal(jumlahHari),
+        null,
+        String(tanggalTervalidasi)
+    );
+}
+
+const pickerTanggalLahirState = initWheelPicker("picker-tanggal-lahir", "wheel-list-tanggal-lahir", buatItemsTanggal(31), null, "1");
+initWheelPicker("picker-bulan-lahir", "wheel-list-bulan-lahir", ITEMS_BULAN, LABEL_BULAN, "1", sesuaikanTanggalMaksimal);
+initWheelPicker("picker-tahun-lahir", "wheel-list-tahun-lahir", ITEMS_TAHUN, null, "2000", sesuaikanTanggalMaksimal);
 
 updateKalender();
 
@@ -374,13 +440,10 @@ document.getElementById("btn-hitung").addEventListener("click", async function()
         document.getElementById("hasil-info").textContent = `Neptu Kamu : ${neptuUser} (${hariUser} ${pasaranUser})`;
 
     } else if (mode === "tanggal-lahir") {
-        const tanggalLahirInput = document.getElementById("input-tanggal-lahir").value;
-        const bagian = tanggalLahirInput.split("-");
-        
-        const tahunLahir = parseInt(bagian[0]);
-        const bulanLahir = parseInt(bagian[1]);
-        const tanggalLahir = parseInt(bagian[2]);
-        
+        const tanggalLahir = parseInt(document.getElementById("picker-tanggal-lahir").dataset.value);
+        const bulanLahir = parseInt(document.getElementById("picker-bulan-lahir").dataset.value);
+        const tahunLahir = parseInt(document.getElementById("picker-tahun-lahir").dataset.value);
+
         if (tahunLahir >= 1970 && tahunLahir <= 2045) {
             // Ambil dari JSON lokal
             const response = await fetch(`/calendar/calendar_${tahunLahir}.json`);

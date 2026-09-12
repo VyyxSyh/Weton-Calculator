@@ -102,6 +102,11 @@
     cursor: pointer;
     backface-visibility: hidden;
     will-change: transform, opacity;
+    white-space: nowrap;
+    padding: 0 8px;
+}
+.wheel-picker--wide {
+    width: 140px;
 }
 .wheel-picker__highlight {
     position: absolute;

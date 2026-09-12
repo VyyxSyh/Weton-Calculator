@@ -9,6 +9,7 @@
     <style type="text/tailwindcss">
         @variant dark (&:where(.dark, .dark *));
     </style>
+    <link rel="icon" type="image/png" href="/src/assets/logo.png"/>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@latest/dist/html2canvas-pro.min.js"></script>   
     <title>Project Tanggalan Jawa</title>
 </head>
@@ -101,8 +102,30 @@
                     </div>
     
                     <div id="section-tanggal-lahir" class="hidden">
-                        <label class="block mb-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                        <input type="date" id="input-tanggal-lahir" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-400">
+                        <label class="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">Pilih Tanggal Lahir</label>
+                        <div class="flex justify-center gap-3">
+                            <div>
+                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tanggal</div>
+                                <div class="wheel-picker" id="picker-tanggal-lahir">
+                                    <div class="wheel-picker__highlight"></div>
+                                    <div class="wheel-picker__list" id="wheel-list-tanggal-lahir"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Bulan</div>
+                                <div class="wheel-picker wheel-picker--wide" id="picker-bulan-lahir">
+                                    <div class="wheel-picker__highlight"></div>
+                                    <div class="wheel-picker__list" id="wheel-list-bulan-lahir"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tahun</div>
+                                <div class="wheel-picker" id="picker-tahun-lahir">
+                                    <div class="wheel-picker__highlight"></div>
+                                    <div class="wheel-picker__list" id="wheel-list-tahun-lahir"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
     
                     <div>
