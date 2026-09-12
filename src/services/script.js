@@ -207,14 +207,38 @@ function buildWheelPicker(listElId, items, labelMap, defaultValue) {
     return { listEl, totalAsli: items.length, items: items };
 }
 
-// Baca posisi scroll sekarang, tentuin item yang lagi di tengah (aktif),
-// dan geser balik ke salinan tengah kalau udah mepet ujung (efek loop tak terbatas)
-function updateWheelActiveItem(pickerState) {
-    const listEl = pickerState.listEl;
-    const totalAsli = pickerState.totalAsli;
+// Dipanggil tiap frame pas lagi scroll: kasih efek wheel 3D (rotateX + scale + fade)
+// ngikutin posisi scroll secara halus, dan update dataset.value real-time
+function renderWheelFrame(pickerState) {
+    const container = pickerState.listEl.parentElement;
     const items = pickerState.items;
-    const container = listEl.parentElement;
+    const totalAsli = pickerState.totalAsli;
+    const centerFloat = container.scrollTop / WHEEL_ITEM_HEIGHT;
+    const anakItem = pickerState.listEl.children;
+    const indexTerdekat = Math.round(centerFloat);
 
+    for (let i = 0; i < anakItem.length; i++) {
+        const distance = i - centerFloat;
+        const absDist = Math.min(Math.abs(distance), 3);
+
+        const scale = 1 - absDist * 0.14;
+        const opacity = Math.max(1 - absDist * 0.32, 0.12);
+        const rotateX = distance * 18; // derajat, biar keliatan kayak roda 3D
+
+        anakItem[i].style.transform = `rotateX(${rotateX}deg) scale(${scale})`;
+        anakItem[i].style.opacity = opacity;
+        anakItem[i].classList.toggle("wheel-picker__item--center", i === indexTerdekat);
+    }
+
+    const indexAsli = ((indexTerdekat % totalAsli) + totalAsli) % totalAsli;
+    container.dataset.value = items[indexAsli];
+}
+
+// Dipanggil pas scroll udah berhenti: geser balik ke salinan tengah kalau udah mepet ujung
+// (efek loop tak terbatas, prosesnya instan & di luar area yang keliatan jadi gak berasa patah)
+function commitWheelPosition(pickerState) {
+    const container = pickerState.listEl.parentElement;
+    const totalAsli = pickerState.totalAsli;
     let index = Math.round(container.scrollTop / WHEEL_ITEM_HEIGHT);
 
     if (index < totalAsli * 0.5) {
@@ -225,12 +249,7 @@ function updateWheelActiveItem(pickerState) {
         container.scrollTop = index * WHEEL_ITEM_HEIGHT;
     }
 
-    const indexAsli = ((index % totalAsli) + totalAsli) % totalAsli;
-    container.dataset.value = items[indexAsli];
-
-    listEl.querySelectorAll(".wheel-picker__item").forEach(function(el, i) {
-        el.classList.toggle("active", i === index);
-    });
+    renderWheelFrame(pickerState);
 }
 
 function initWheelPicker(containerId, listId, items, labelMap, defaultValue) {
@@ -238,14 +257,33 @@ function initWheelPicker(containerId, listId, items, labelMap, defaultValue) {
     const pickerState = buildWheelPicker(listId, items, labelMap, defaultValue);
     container.dataset.value = defaultValue;
 
-    updateWheelActiveItem(pickerState);
+    renderWheelFrame(pickerState);
 
-    let scrollTimeout;
+    // Klik salah satu item buat langsung snap ke situ dengan animasi smooth
+    pickerState.listEl.querySelectorAll(".wheel-picker__item").forEach(function(el, i) {
+        el.addEventListener("click", function() {
+            container.scrollTo({ top: i * WHEEL_ITEM_HEIGHT, behavior: "smooth" });
+        });
+    });
+
+    let sedangAnimasi = false;
+    let commitTimeout;
+
     container.addEventListener("scroll", function() {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(function() {
-            updateWheelActiveItem(pickerState);
-        }, 100);
+        // Update tampilan tiap frame biar animasinya nempel & halus ngikutin jari/scroll
+        if (!sedangAnimasi) {
+            sedangAnimasi = true;
+            requestAnimationFrame(function() {
+                renderWheelFrame(pickerState);
+                sedangAnimasi = false;
+            });
+        }
+
+        // Setelah scroll berhenti (gak ada event baru selama 120ms), baru commit posisi loop-nya
+        clearTimeout(commitTimeout);
+        commitTimeout = setTimeout(function() {
+            commitWheelPosition(pickerState);
+        }, 120);
     });
 }
 
