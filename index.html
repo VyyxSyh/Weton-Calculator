@@ -1,181 +1,189 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/src/components/layout/style.css" rel="stylesheet">
-    <link href="/src/components/ui/style.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style type="text/tailwindcss">
-        @variant dark (&:where(.dark, .dark *));
-    </style>
-    <link rel="icon" type="image/png" href="/src/assets/logo.png"/>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@latest/dist/html2canvas-pro.min.js"></script>   
-    <title>Project Tanggalan Jawa</title>
-</head>
-<body class="bg-slate-50 dark:bg-slate-900 min-h-screen transition-colors duration-300">
-    <div class="max-w-4xl mx-auto px-4 py-6 sm:py-10">
-        
-        <!-- Top bar: logo + dark mode toggle -->
-        <div class="flex justify-between items-center mb-6">
-            <div class="flex items-center gap-2">
-                <img src="/src/assets/logo.png" alt="Logo AFFI" class="w-9 h-9 rounded-lg object-contain">
-                <span class="font-semibold text-slate-700 dark:text-slate-300">By Vyy</span>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="/src/components/layout/style.css" rel="stylesheet">
+        <link href="/src/components/ui/style.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <style type="text/tailwindcss">
+            @variant dark (&:where(.dark, .dark *));
+        </style>
+        <link rel="icon" type="image/png" href="/src/assets/logo.png"/>
+        <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@latest/dist/html2canvas-pro.min.js"></script>   
+        <title>Project Tanggalan Jawa</title>
+    </head>
+    <body class="bg-slate-50 dark:bg-slate-900 min-h-screen transition-colors duration-300">
+        <div class="max-w-4xl mx-auto px-4 py-6 sm:py-10">
+            
+            <!-- Top bar: logo + dark mode toggle -->
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-2">
+                    <img src="/src/assets/logo.png" alt="Logo AFFI" class="w-9 h-9 rounded-lg object-contain">
+                    <span class="font-semibold text-slate-700 dark:text-slate-300">By Vyy</span>
+                </div>
+                
+                <div class="toggleWrapper">
+                    <input class="input" id="dn" type="checkbox" checked />
+                    <label class="toggle" for="dn">
+                        <span class="toggle__handler">
+                            <span class="crater crater--1"></span>
+                            <span class="crater crater--2"></span>
+                            <span class="crater crater--3"></span>
+                        </span>
+                        <span class="star star--1"></span>
+                        <span class="star star--2"></span>
+                        <span class="star star--3"></span>
+                        <span class="star star--4"></span>
+                        <span class="star star--5"></span>
+                        <span class="star star--6"></span>
+                    </label>
+                </div>
             </div>
             
-            <div class="toggleWrapper">
-                <input class="input" id="dn" type="checkbox" checked />
-                <label class="toggle" for="dn">
-                    <span class="toggle__handler">
-                        <span class="crater crater--1"></span>
-                        <span class="crater crater--2"></span>
-                        <span class="crater crater--3"></span>
-                    </span>
-                    <span class="star star--1"></span>
-                    <span class="star star--2"></span>
-                    <span class="star star--3"></span>
-                    <span class="star star--4"></span>
-                    <span class="star star--5"></span>
-                    <span class="star star--6"></span>
-                </label>
-            </div>
-        </div>
-        
-        <div id="area-screenshot" class="p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-xl">
-            <h1 class="text-2xl sm:text-3xl font-bold text-center text-sky-500">Kalender Weton Jawa</h1>
-            <h2 id="bulan-tahun-label" class="text-lg sm:text-xl text-center font-bold text-slate-700 dark:text-slate-200 mt-1 mb-6"></h2>
+            <div id="area-screenshot" class="p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-xl">
+                <h1 class="text-2xl sm:text-3xl font-bold text-center text-sky-500">Kalender Weton Jawa</h1>
+                <h2 id="bulan-tahun-label" class="text-lg sm:text-xl text-center font-bold text-slate-700 dark:text-slate-200 mt-1 mb-6"></h2>
 
-            <!-- Day Headers -->
-            <div class="grid grid-cols-7 gap-1 sm:gap-2 font-bold text-center text-slate-500 dark:text-slate-400 text-[10px] sm:text-sm mb-2">
-                <div><span class="sm:hidden">Min</span><span class="hidden sm:inline">Minggu</span></div>
-                <div><span class="sm:hidden">Sen</span><span class="hidden sm:inline">Senin</span></div>
-                <div><span class="sm:hidden">Sel</span><span class="hidden sm:inline">Selasa</span></div>
-                <div><span class="sm:hidden">Rab</span><span class="hidden sm:inline">Rabu</span></div>
-                <div><span class="sm:hidden">Kam</span><span class="hidden sm:inline">Kamis</span></div>
-                <div><span class="sm:hidden">Jum</span><span class="hidden sm:inline">Jumat</span></div>
-                <div><span class="sm:hidden">Sab</span><span class="hidden sm:inline">Sabtu</span></div>
-            </div>
-    
-            <!-- Calendar Grid -->
-            <div id="calendar-grid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
-    
-            <div class="flex justify-between items-center mt-4">
-                <button id="prev-month" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">‹ Prev</button>
-                <button id="next-month" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Next ›</button>
-            </div>
-    
-            <!-- Input Section -->
-            <div class="mt-10 pt-8 border-t border-slate-200 dark:border-slate-700">
-                <h2 class="text-xl sm:text-2xl font-bold mb-6 text-center text-slate-800 dark:text-slate-100">Cek Hari Baik/Buruk</h2>
-    
-                <div id="form-input-section" class="max-w-md mx-auto space-y-4">
-                    <div>
-                        <label class="block mb-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Pilih Metode Input</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" data-mode="hari-pasaran" class="mode-btn px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                Hari & Pasaran
-                            </button>
-                            <button type="button" data-mode="tanggal-lahir" class="mode-btn px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                Tgl Lahir
-                            </button>
-                        </div>
-                    </div>
-    
-                    <div id="section-hari-pasaran" class="hidden">
-                        <label class="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">Pilih Hari & Pasaran</label>
-                        <div class="flex justify-center gap-3">
-                            <div>
-                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Hari</div>
-                                <div class="wheel-picker" id="picker-hari">
-                                    <div class="wheel-picker__highlight"></div>
-                                    <div class="wheel-picker__list" id="wheel-list-hari"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Pasaran</div>
-                                <div class="wheel-picker" id="picker-pasaran">
-                                    <div class="wheel-picker__highlight"></div>
-                                    <div class="wheel-picker__list" id="wheel-list-pasaran"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <div id="section-tanggal-lahir" class="hidden">
-                        <label class="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">Pilih Tanggal Lahir</label>
-                        <div class="flex justify-center gap-3">
-                            <div>
-                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tanggal</div>
-                                <div class="wheel-picker" id="picker-tanggal-lahir">
-                                    <div class="wheel-picker__highlight"></div>
-                                    <div class="wheel-picker__list" id="wheel-list-tanggal-lahir"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Bulan</div>
-                                <div class="wheel-picker wheel-picker--wide" id="picker-bulan-lahir">
-                                    <div class="wheel-picker__highlight"></div>
-                                    <div class="wheel-picker__list" id="wheel-list-bulan-lahir"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tahun</div>
-                                <div class="wheel-picker" id="picker-tahun-lahir">
-                                    <div class="wheel-picker__highlight"></div>
-                                    <div class="wheel-picker__list" id="wheel-list-tahun-lahir"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-    
-                    <div>
-                        <label class="block mb-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Bulan & Tahun yang mau dicek</label>
-                        <input type="month" id="input-bulan-target" class="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-400">
-                    </div>
-    
-                    <button id="btn-hitung" class="w-full px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-lg transition-colors">
-                        Hitung Hari Baik/Buruk
-                    </button>
+                <!-- Day Headers -->
+                <div class="grid grid-cols-7 gap-1 sm:gap-2 font-bold text-center text-slate-500 dark:text-slate-400 text-[10px] sm:text-sm mb-2">
+                    <div><span class="sm:hidden">Min</span><span class="hidden sm:inline">Minggu</span></div>
+                    <div><span class="sm:hidden">Sen</span><span class="hidden sm:inline">Senin</span></div>
+                    <div><span class="sm:hidden">Sel</span><span class="hidden sm:inline">Selasa</span></div>
+                    <div><span class="sm:hidden">Rab</span><span class="hidden sm:inline">Rabu</span></div>
+                    <div><span class="sm:hidden">Kam</span><span class="hidden sm:inline">Kamis</span></div>
+                    <div><span class="sm:hidden">Jum</span><span class="hidden sm:inline">Jumat</span></div>
+                    <div><span class="sm:hidden">Sab</span><span class="hidden sm:inline">Sabtu</span></div>
                 </div>
-    
-                <div id="hasil-info" class="mt-4 text-center font-semibold text-slate-700 dark:text-slate-200"></div>
+        
+                <!-- Calendar Grid -->
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 sm:gap-2"></div>
+        
+                <div class="flex justify-between items-center mt-4">
+                    <button id="prev-month" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">‹ Prev</button>
+                    <button id="next-month" class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Next ›</button>
+                </div>
+        
+                <!-- Input Section -->
+                <div class="mt-10 pt-8 border-t border-slate-200 dark:border-slate-700">
+                    <h2 class="text-xl sm:text-2xl font-bold mb-6 text-center text-slate-800 dark:text-slate-100">Cek Hari Baik/Buruk</h2>
+        
+                    <div id="form-input-section" class="max-w-md mx-auto space-y-4">
+                        <div>
+                            <label class="block mb-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Pilih Metode Input</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" data-mode="hari-pasaran" class="mode-btn px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    Hari & Pasaran
+                                </button>
+                                <button type="button" data-mode="tanggal-lahir" class="mode-btn px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    Tgl Lahir
+                                </button>
+                            </div>
+                        </div>
+        
+                        <div id="section-hari-pasaran" class="hidden">
+                            <label class="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">Pilih Hari & Pasaran</label>
+                            <div class="flex justify-center gap-3">
+                                <div>
+                                    <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Hari</div>
+                                    <div class="wheel-picker" id="picker-hari">
+                                        <div class="wheel-picker__highlight"></div>
+                                        <div class="wheel-picker__list" id="wheel-list-hari"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Pasaran</div>
+                                    <div class="wheel-picker" id="picker-pasaran">
+                                        <div class="wheel-picker__highlight"></div>
+                                        <div class="wheel-picker__list" id="wheel-list-pasaran"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div id="section-tanggal-lahir" class="hidden">
+                            <label class="block mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 text-center">Pilih Tanggal Lahir</label>
+                            <div class="flex justify-center gap-3">
+                                <div>
+                                    <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tanggal</div>
+                                    <div class="wheel-picker" id="picker-tanggal-lahir">
+                                        <div class="wheel-picker__highlight"></div>
+                                        <div class="wheel-picker__list" id="wheel-list-tanggal-lahir"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Bulan</div>
+                                    <div class="wheel-picker wheel-picker--wide" id="picker-bulan-lahir">
+                                        <div class="wheel-picker__highlight"></div>
+                                        <div class="wheel-picker__list" id="wheel-list-bulan-lahir"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="text-center text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tahun</div>
+                                    <div class="wheel-picker" id="picker-tahun-lahir">
+                                        <div class="wheel-picker__highlight"></div>
+                                        <div class="wheel-picker__list" id="wheel-list-tahun-lahir"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div>
+                            <label class="block mb-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Bulan & Tahun yang mau dicek</label>
+                            <div class="grid grid-cols-2 gap-2 mb-2">
+                                <button type="button" id="btn-pilih-manual" class="px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    Pilih Manual
+                                </button>
+                                <button type="button" id="btn-bulan-ini" class="px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                    Bulan Ini
+                                </button>
+                            </div>
+                            <input type="month" id="input-bulan-target" class="hidden w-full border border-slate-300 dark:border-slate-600 rounded-lg p-2.5 text-sm bg-white dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-400">
+                        </div>
+        
+                        <button id="btn-hitung" class="w-full px-4 py-2.5 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-lg transition-colors">
+                            Hitung Hari Baik/Buruk
+                        </button>
+                    </div>
+        
+                    <div id="hasil-info" class="mt-4 text-center font-semibold text-slate-700 dark:text-slate-200"></div>
+                </div>
+        
+                <div id="legend-section" class="mt-8 hidden max-w-2xl mx-auto">
+                    <h3 class="text-base font-bold mb-3 text-slate-800 dark:text-slate-100">Keterangan Warna</h3>
+                    <div id="legend-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3"></div>
+                </div>
             </div>
-    
-            <div id="legend-section" class="mt-8 hidden max-w-2xl mx-auto">
-                <h3 class="text-base font-bold mb-3 text-slate-800 dark:text-slate-100">Keterangan Warna</h3>
-                <div id="legend-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3"></div>
+
+            <div class="text-center">
+                <button id="btn-ubah-weton" class="mt-6 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors hidden">
+                    Ubah Weton
+                </button>
+            </div>
+
+            <div class="text-center space-x-2">
+                <button id="btn-download" class="mt-6 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors hidden">
+                    📥 Download Hasil
+                </button>
+                <button id="btn-ubah-weton" class="mt-6 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors hidden">
+                    Ubah Weton
+                </button>
             </div>
         </div>
 
-        <div class="text-center">
-            <button id="btn-ubah-weton" class="mt-6 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors hidden">
-                Ubah Weton
-            </button>
-        </div>
+        <footer class="mt-16 pt-6 pb-8 border-t border-slate-200 dark:border-slate-700 text-center text-xs text-slate-500 dark:text-slate-400">
+            <p>&copy; 2026 Vyy. All rights reserved.</p>
+            <p class="mt-2">
+                Made with by
+                <a href="https://tailwindcss.com" target="_blank" class="underline hover:text-sky-500">Tailwind CSS</a>
+                &middot; Toggle switch by
+                <a href="https://uiverse.io" target="_blank" class="underline hover:text-sky-500">Uiverse.io (mobinkakei)</a>
+                &middot; Data Calendar & Weton by 
+                <a href="https://tanggalanjawa.com" target="_blank" class="underline hover:text-sky-500">tanggalanjawa.com</a>
+            </p>
+        </footer>
 
-        <div class="text-center space-x-2">
-            <button id="btn-download" class="mt-6 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors hidden">
-                📥 Download Hasil
-            </button>
-            <button id="btn-ubah-weton" class="mt-6 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors hidden">
-                Ubah Weton
-            </button>
-        </div>
-    </div>
-
-    <footer class="mt-16 pt-6 pb-8 border-t border-slate-200 dark:border-slate-700 text-center text-xs text-slate-500 dark:text-slate-400">
-        <p>&copy; 2026 Vyy. All rights reserved.</p>
-        <p class="mt-2">
-            Made with by
-            <a href="https://tailwindcss.com" target="_blank" class="underline hover:text-sky-500">Tailwind CSS</a>
-            &middot; Toggle switch by
-            <a href="https://uiverse.io" target="_blank" class="underline hover:text-sky-500">Uiverse.io (mobinkakei)</a>
-            &middot; Data Calendar & Weton by 
-            <a href="https://tanggalanjawa.com" target="_blank" class="underline hover:text-sky-500">tanggalanjawa.com</a>
-        </p>
-    </footer>
-
-    <script src="/src/services/script.js"></script>
-    <script src="/src/api/script.js"></script>
-</body>
+        <script src="/src/services/script.js"></script>
+        <script src="/src/api/script.js"></script>
+    </body>
 </html>

@@ -427,10 +427,12 @@ document.querySelectorAll(".mode-btn").forEach(function(btn) {
 });
 
 // Event listener for the "Hitung" button
-document.getElementById("btn-hitung").addEventListener("click", async function() {
+// Hitung neptu berdasarkan mode yang lagi aktif (Hari&Pasaran / Tanggal Lahir).
+// Dipisah jadi fungsi sendiri biar bisa dipanggil dari tombol "Hitung" ATAU tombol shortcut "Bulan Ini"
+async function hitungNeptuDariInput() {
     const mode = modeAktif;
     let neptuUser = null;
-    
+
     if (mode === "hari-pasaran") {
         const hariUser = document.getElementById("picker-hari").dataset.value;
         const pasaranUser = document.getElementById("picker-pasaran").dataset.value;
@@ -448,40 +450,71 @@ document.getElementById("btn-hitung").addEventListener("click", async function()
             // Ambil dari JSON lokal
             const response = await fetch(`/calendar/calendar_${tahunLahir}.json`);
             const data = await response.json();
-            
+
             const namaBulan = ["january", "february", "march", "april", "may", "june", 
                             "july", "august", "september", "october", "november", "december"];
             const bulanNama = namaBulan[bulanLahir - 1];
-            
+
             const dataBulan = data[bulanNama];
             const dataHariLahir = dataBulan.find(item => item.day === tanggalLahir);
-            
+
             neptuUser = hitungNeptuUser(dataHariLahir.weekday, dataHariLahir.pasaran); 
 
             document.getElementById("hasil-info").textContent = `Neptu kamu: ${neptuUser} (${dataHariLahir.weekday} ${dataHariLahir.pasaran})`; 
-            
+
         } else {
             document.getElementById("hasil-info").textContent = "Maaf, saat ini kalender hanya mendukung tahun 1970-2045. Coba input tanggal lahir dalam rentang tersebut.";
         }
     }
 
-    if (neptuUser !== null) {
-        neptuUserAktif = neptuUser;
-        const bulanTargetInput = document.getElementById("input-bulan-target").value; // format: "2026-07"
-        const bagianTarget = bulanTargetInput.split("-");
-        
-        currentYear = parseInt(bagianTarget[0]);
-        currentMonth = parseInt(bagianTarget[1]) - 1; // kenapa -1 lagi di sini? coba inget alasan yg sama kayak sebelumnya
-        
-        updateKalender();
-        ambilDataKalender(neptuUser);
-        document.getElementById("bulan-tahun-label").textContent = `${getNamaBulan(currentMonth)} ${currentYear}`;
+    return neptuUser;
+}
 
-        document.getElementById("form-input-section").classList.add("hidden");
-        document.getElementById("btn-ubah-weton").classList.remove("hidden");
-        document.getElementById("legend-section").classList.remove("hidden");
-        document.getElementById("btn-download").classList.remove("hidden");
-    }
+// Nampilin kalender sesuai neptu & bulan/tahun target yang udah ditentuin
+function tampilkanHasilKalender(neptuUser, tahunTarget, bulanTarget) {
+    neptuUserAktif = neptuUser;
+    currentYear = tahunTarget;
+    currentMonth = bulanTarget - 1; // kenapa -1 lagi di sini? coba inget alasan yg sama kayak sebelumnya
+
+    updateKalender();
+    ambilDataKalender(neptuUser);
+    document.getElementById("bulan-tahun-label").textContent = `${getNamaBulan(currentMonth)} ${currentYear}`;
+
+    document.getElementById("form-input-section").classList.add("hidden");
+    document.getElementById("btn-ubah-weton").classList.remove("hidden");
+    document.getElementById("legend-section").classList.remove("hidden");
+    document.getElementById("btn-download").classList.remove("hidden");
+}
+
+document.getElementById("btn-hitung").addEventListener("click", async function() {
+    const neptuUser = await hitungNeptuDariInput();
+    if (neptuUser === null) return;
+
+    const bulanTargetInput = document.getElementById("input-bulan-target").value; // format: "2026-07"
+    const bagianTarget = bulanTargetInput.split("-");
+
+    const tahunTarget = parseInt(bagianTarget[0]);
+    const bulanTarget = parseInt(bagianTarget[1]);
+
+    tampilkanHasilKalender(neptuUser, tahunTarget, bulanTarget);
+});
+
+// Tombol "Pilih Manual": munculin input bulan-tahun biar usernya pilih sendiri,
+// lanjutannya tetep lewat tombol "Hitung Hari Baik/Buruk"
+document.getElementById("btn-pilih-manual").addEventListener("click", function() {
+    const inputBulanTarget = document.getElementById("input-bulan-target");
+    inputBulanTarget.classList.remove("hidden");
+    inputBulanTarget.focus();
+});
+
+// Tombol "Bulan Ini": shortcut, langsung proses pakai bulan & tahun sekarang
+// juga, gak perlu klik "Hitung Hari Baik/Buruk" lagi
+document.getElementById("btn-bulan-ini").addEventListener("click", async function() {
+    const neptuUser = await hitungNeptuDariInput();
+    if (neptuUser === null) return;
+
+    const sekarang = new Date();
+    tampilkanHasilKalender(neptuUser, sekarang.getFullYear(), sekarang.getMonth() + 1);
 });
 
 // Event listener for the "Ubah Weton" button       
